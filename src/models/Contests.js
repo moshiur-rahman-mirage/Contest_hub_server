@@ -9,7 +9,7 @@ const Contests = new Schema({
     },
     contest_creator: {
         type: String,
-        // require: true
+        require: true
     },
     contest_description: {
         type: String,

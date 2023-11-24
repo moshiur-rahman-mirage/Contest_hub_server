@@ -2,21 +2,22 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-const Contests = require('../models/Contests');
-const verifyToken = require('../applyMiddleWare/verifyToken');
+const Users = require('../models/Users');
+const setToken = require('../authentication/setToken');
 
 
 // model
-const Contest = new mongoose.model("Contest", Contests);
+const User = new mongoose.model("User", Users);
 
 
 
+router.post('/jwt',setToken)
 
-// get all
+
 router.get('/', async (req, res) => {
     console.log('called')
     try {
-        const data = await Contest.find({})
+        const data = await User.find({})
         res.json(data);
     }
     catch (error) {
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
 // get one by id
 router.get('/:id', async (req, res) => {
     try {
-        const data = await Contest.find({ _id: req.params.id })
+        const data = await User.find({ _id: req.params.id })
         res.json(data)
     } catch {
         console.error(error);
@@ -38,11 +39,11 @@ router.get('/:id', async (req, res) => {
 })
 
 // post one
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        const newContest = new Contest(req.body);
+        const newUser = new User(req.body);
 
-        const savedInstance = await newContest.save()
+        const savedInstance = await newUser.save()
         res.json(savedInstance);
     }
     catch (error) {
@@ -57,7 +58,7 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const updatedDocument = await Contest.findByIdAndUpdate(
+        const updatedDocument = await User.findByIdAndUpdate(
             { _id: id },
             { new: true, runValidators: true }
         );
@@ -76,7 +77,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const id = req.params.id
-        const deletedDocument = await Contest.findByIdAndDelete(id)
+        const deletedDocument = await User.findByIdAndDelete(id)
         if (!deletedDocument) {
             return res.status(404).json({ error: 'Document not found' });
         }

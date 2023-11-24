@@ -2,6 +2,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const contestRouter = require('./router/contestRouter');
+const userRouter = require('./router/userRouter');
 const applyMiddleware = require('./applyMiddleWare/applyMiddleware');
 const app=express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.get("/health", (req, res) => {
 
 
 app.use('/contest',contestRouter);
+app.use('/user',userRouter);
 
 
 app.listen(5000,()=>{
