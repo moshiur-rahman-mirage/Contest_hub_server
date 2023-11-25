@@ -14,9 +14,16 @@ const Contest = new mongoose.model("Contest", Contests);
 
 // get all
 router.get('/', async (req, res) => {
-    console.log('called')
     try {
-        const data = await Contest.find({})
+        let query = {};
+        if (req.query?.contest_category) {
+            query = { contest_category: req.query.contest_category }
+        }
+        if (req.query?.creatorEmail) {
+            query = { contest_creator: req.query.creatorEmail }
+            console.log(query)
+        }
+        const data = await Contest.find(query)
         res.json(data);
     }
     catch (error) {
@@ -52,24 +59,44 @@ router.post('/', verifyToken, async (req, res) => {
 })
 
 
-// put todo
-router.put('/:id', async (req, res) => {
+
+router.put('/:id',verifyToken, async (req, res) => {
     const { id } = req.params;
 
-    try {
-        const updatedDocument = await Contest.findByIdAndUpdate(
-            { _id: id },
-            { new: true, runValidators: true }
-        );
-        if (!updatedDocument) {
-            return res.status(404).json({ error: 'Document not found' });
-        }
+    const filter = { _id: id };
+    console.log(filter)
+    const update = { 
+        contest_name:req.body.contest_name,
+        contest_description:req.body.contest_description,
+        contest_prize:req.body.contest_prize,
+        contest_deadline:req.body.contest_deadline,
+        contest_category:req.body.contest_category,
+        contest_price:req.body.contest_price,
+        contest_instruction:req.body.contest_instruction
+    };
+    console.log(update)
+    const doc = await Contest.findOneAndUpdate(filter, update, {
+        new: true
+    });
+    res.json(doc);
 
-        res.json(updatedDocument);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+});
+
+
+
+
+router.put('/admin/:id',verifyToken, async (req, res) => {
+    const { id } = req.params;
+    console.log(id)
+    const filter = { _id: id };
+    console.log(filter)
+    const update = { contest_status: 'Accepted' };
+    console.log(update)
+    const doc = await Contest.findOneAndUpdate(filter, update, {
+        new: true
+    });
+    res.json(doc);
+
 });
 
 // delete
@@ -77,6 +104,21 @@ router.delete('/:id', async (req, res) => {
     try {
         const id = req.params.id
         const deletedDocument = await Contest.findByIdAndDelete(id)
+        if (!deletedDocument) {
+            return res.status(404).json({ error: 'Document not found' });
+        }
+        res.json({ message: 'Document deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+
+router.delete('/', async (req, res) => {
+    try {
+        const id = req.params.id
+        const deletedDocument = await Contest.deleteMany({})
         if (!deletedDocument) {
             return res.status(404).json({ error: 'Document not found' });
         }

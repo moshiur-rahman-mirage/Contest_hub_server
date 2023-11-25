@@ -29,7 +29,19 @@ const Contests = new Schema({
     },
     contest_status: {
         type: String,
-        // require: true
+        default: 'Pending'
+    },
+    contest_price: {
+        type: Number,
+         require: true
+    },
+    contest_instruction: {
+        type: String,
+         require: true
+    },
+    contest_category: {
+        type: String,
+         require: true
     }
 
 
