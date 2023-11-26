@@ -23,7 +23,8 @@ router.get('/', async (req, res) => {
             query = { contest_creator: req.query.creatorEmail }
             console.log(query)
         }
-        const data = await Contest.find(query)
+        const data = await Contest.find(query).limit(parseInt(req.query?.size) > 3 ? 4 : 100) 
+        //.limit(parseInt(req.query?.size)) > 3 ? 4 : 100
         res.json(data);
     }
     catch (error) {
@@ -39,10 +40,33 @@ router.get('/:id', async (req, res) => {
         const data = await Contest.find({ _id: req.params.id })
         res.json(data)
     } catch {
-        console.error(error);
+        console.log('why here?')
+        console.log(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 })
+
+// // category
+// router.get('/category', async (req, res) => {
+//     try {
+//         const data = await Contest.distinct('contest_category')
+//         res.json(data)
+//     } catch {
+//         // console.log(error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// })
+router.get('/contest_category/category', async (req, res) => {
+    try {
+        const data = await Contest.distinct('contest_category')
+        res.json(data)
+    } catch {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
 
 // post one
 router.post('/', verifyToken, async (req, res) => {
@@ -60,19 +84,19 @@ router.post('/', verifyToken, async (req, res) => {
 
 
 
-router.put('/:id',verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
 
     const filter = { _id: id };
     console.log(filter)
-    const update = { 
-        contest_name:req.body.contest_name,
-        contest_description:req.body.contest_description,
-        contest_prize:req.body.contest_prize,
-        contest_deadline:req.body.contest_deadline,
-        contest_category:req.body.contest_category,
-        contest_price:req.body.contest_price,
-        contest_instruction:req.body.contest_instruction
+    const update = {
+        contest_name: req.body.contest_name,
+        contest_description: req.body.contest_description,
+        contest_prize: req.body.contest_prize,
+        contest_deadline: req.body.contest_deadline,
+        contest_category: req.body.contest_category,
+        contest_price: req.body.contest_price,
+        contest_instruction: req.body.contest_instruction
     };
     console.log(update)
     const doc = await Contest.findOneAndUpdate(filter, update, {
@@ -85,7 +109,7 @@ router.put('/:id',verifyToken, async (req, res) => {
 
 
 
-router.put('/admin/:id',verifyToken, async (req, res) => {
+router.put('/admin/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     console.log(id)
     const filter = { _id: id };
