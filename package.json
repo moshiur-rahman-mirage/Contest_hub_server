@@ -4,8 +4,8 @@
   "description": "\"# b8a12-server-side-moshiur-rahman-mirage\"",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
