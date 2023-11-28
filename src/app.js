@@ -27,9 +27,9 @@ app.use('/stripe',stripePayment);
 app.use('/payments',paymentRoute)
 
 
-app.listen(5000,()=>{
-    console.log('Contest running')
-})
+// app.listen(5000,()=>{
+//     console.log('Contest running')
+// })
 
 
 module.exports=app
