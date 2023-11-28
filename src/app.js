@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const contestRouter = require('./router/contestRouter');
 const userRouter = require('./router/userRouter');
 const submissionRouter = require('./router/submissionRoute');
+const stripePayment = require('./router/stripePayment');
+const paymentRoute = require('./router/paymentRoute');
 const applyMiddleware = require('./applyMiddleWare/applyMiddleware');
 const app=express();
 app.use(express.json());
@@ -27,8 +29,10 @@ app.get("/health", (req, res) => {
 
 
 app.use('/contest',contestRouter);
-app.use('/user',userRouter);
+app.use('/users',userRouter);
 app.use('/submission',submissionRouter);
+app.use('/stripe',stripePayment);
+app.use('/payments',paymentRoute)
 
 
 app.listen(5000,()=>{

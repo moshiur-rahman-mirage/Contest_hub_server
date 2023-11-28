@@ -42,7 +42,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const newUser = new User(req.body);
-
+        console.log(newUser)
         const savedInstance = await newUser.save()
         res.json(savedInstance);
     }
