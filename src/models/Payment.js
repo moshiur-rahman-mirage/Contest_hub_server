@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const { Schema,model } = require('mongoose');
 
-const Payment = new Schema({
+const paymentSchema = new Schema({
     user_id: {
         type: String,
         require: true
@@ -27,4 +27,5 @@ const Payment = new Schema({
         type:Number
     }
 })
+const Payment=model('Payment',paymentSchema);
 module.exports = Payment

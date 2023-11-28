@@ -4,11 +4,13 @@ const router = express.Router();
 
 const Payments = require('../models/Payment');
 // const verifyToken = require('../applyMiddleWare/verifyToken');
-const userSchema = require('../models/Users')
+const User = require('../models/Users');
+const Contest = require('../models/Contests');
+const Payment = require('../models/Payment');
 
 // model
-const Payment = new mongoose.model("Payment", Payments);
-const User = new mongoose.model('User', userSchema);
+// const Payments = mongoose.model("Payment", Payments);
+// const User = mongoose.model('User', userSchema);
 
 router.post('/', async (req, res) => {
     const newPayment = new Payment(req.body);
@@ -17,49 +19,68 @@ router.post('/', async (req, res) => {
     res.send(paymentResult);
     //  console.log(paymentResult.acknowledged)
     if (paymentResult._id) {
-        console.log('inside acknowledge')
-        const  email= newPayment.email ;
-        console.log(newPayment)
-        const contestIds=newPayment.contest_id;
-         console.log(contestIds)
-        addContestsToUser(email, contestIds)
-       
+        // console.log('inside acknowledge')
+        const email = newPayment.email;
+        // console.log(newPayment)
+        const contestIds = newPayment.contest_id;
+        // console.log(contestIds)
+        addUserParticipatedContests(email, contestIds)
+
     }
     // console.log(paymentResult)
 })
 
 
-async function addContestsToUser(email, contestIds) {
+async function addUserParticipatedContests(email, contestIds) {
     try {
-
-        // console.log(contestIds)
-        const user = await User.findOne({ email })
-        if(!user){
-            console.log('user not found!')
-        }else{
-            // console.log('inside one step')
-            // console.log(email)
-            // console.log(contestIds)
-            // console.log(user)
-            // await User.updateOne(
-            //     { email: email },
-            //     {
-            //       $push: {
-            //         participatedContests: {
-            //           $each: contestIds,
-            //         },
-            //       },
-            //     }
-            //   );
-            User.participatedContests.push(...contestIds);
+        const user = await User.findOne({ email: email });
+        const id = user._id
+        if (!user) {
+            throw new Error('User not found.');
         }
-        // user.participatedContests.push(...contestIds);
 
-        // await user.save();
+        const contestIdsArray = Array.isArray(contestIds) ? contestIds : [contestIds];
+        await User.updateOne(
 
-        console.log('Contests added to the user successfully.');
+            { _id: id },
+            {
+                $push: {
+                    "participatedContests": {
+                        $each: contestIdsArray,
+                    },
+                },
+            }
+        );
+
+        console.log('Contest IDs added to the user successfully.');
+        incrementParticipants(contestIds)
     } catch (error) {
-        console.error('Error adding contests to user:', error.message);
+        console.error('Error adding contest IDs to user:', error.message);
+    } finally {
+        //   mongoose.disconnect();
+    }
+}
+
+
+
+
+
+async function incrementParticipants(contestId) {
+    try {
+        const filter={_id:contestId}
+        const update={ $inc: { participants: 1 } }
+        console.log(update)
+       console.log(filter)
+    //    console.log(Contests)
+       const result= await Contest.findOneAndUpdate(filter, update, {
+            new: true
+          });
+
+
+    } catch (error) {
+        console.error('Error incrementing participants:', error.message);
+    } finally {
+        // mongoose.disconnect();
     }
 }
 

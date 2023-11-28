@@ -3,9 +3,10 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
-  console.log(req)
+  // console.log(req)
+  // console.log('here')
   if (!req.headers.authorization) {
-    console.log(req)
+    // console.log(req)
     return res.status(401).send({ message: 'Forbidden Access!' });
   }
   const token = req.headers.authorization.split(' ')[1];
@@ -14,6 +15,7 @@ const verifyToken = (req, res, next) => {
       return res.status(401).send({ message: 'Forbidden Access!' });
     }
     req.decoded = decoded
+    // console.log(decoded)
     next();
   })
 };

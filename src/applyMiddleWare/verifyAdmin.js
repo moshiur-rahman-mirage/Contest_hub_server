@@ -1,7 +1,11 @@
+const Users = require("../models/Users");
+
+
 const verifyAdmin = async (req, res, next) => {
+  console.log('verify admin')
     const email = req.decoded.email;
     const query = { email: email };
-    const user = await userCollection.findOne(query);
+    const user = await Users.findOne(query);
     const isAdmin = user?.role === 'admin'
     if (!isAdmin) {
       return res.status(403).send({ message: 'unauthorized access' });
@@ -9,3 +13,6 @@ const verifyAdmin = async (req, res, next) => {
       next();
     }
   }
+
+
+  module.exports = verifyAdmin;

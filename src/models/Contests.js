@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const { Schema,model } = require('mongoose');
 
-const Contests = new Schema({
+const contestSchema = new Schema({
     contest_name: {
         type: String,
         require: true
@@ -25,7 +25,6 @@ const Contests = new Schema({
     },
     contest_image: {
         type: String,
-        // require: true
     },
     contest_status: {
         type: String,
@@ -39,6 +38,10 @@ const Contests = new Schema({
         type: String,
          require: true
     },
+    participants: {
+        type: Number,
+        default: 0,
+      },
     contest_category: {
         type: String,
          require: true
@@ -46,4 +49,6 @@ const Contests = new Schema({
 
 
 })
+
+const Contests = model('Contest', contestSchema);
 module.exports = Contests

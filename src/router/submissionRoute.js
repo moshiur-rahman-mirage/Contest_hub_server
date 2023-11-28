@@ -2,38 +2,24 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-const Submissions = require('../models/Submissions');
+const Users = require('../models/Users');
 
-
-
-// model
-const Submission = new mongoose.model("Submission", Submissions);
-
-
-
-
-// get all
-router.get('/contest/${params.id}', async (req, res) => {
+// get all users who participated in a specific contest
+router.get('/contest/:id', async (req, res) => {
     try {
-        let query = {};
-        if (req.query?.contest_category) {
-            query = { contest_category: req.query.contest_category }
-        }
-        if (req.query?.creatorEmail) {
-            query = { contest_creator: req.query.creatorEmail }
-            console.log(query)
-        }
-        const data = await Submission.find(query)
-        res.json(data);
-    }
-    catch (error) {
+        const contestId = req.params.id;
+        console.log('Contest ID:', contestId);
+
+        const users = await Users.find({ participatedContests: contestId })
+            .populate('participatedContests')
+            .exec();
+
+        console.log('Users who have submitted for the contest:', users);
+        res.json(users);
+    } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
-
     }
-})
-
-
-
+});
 
 module.exports = router;

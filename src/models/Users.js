@@ -1,26 +1,32 @@
 const { model, Schema, default: mongoose } = require("mongoose");
+const Contest = require('./Contests');
+const userSchema = new Schema({
 
-const Users = new Schema({
-    
-    'img':{
-        type:String ,
+    'img': {
+        type: String,
         required: true
     },
-    "name":{
-        type:String ,
+    "name": {
+        type: String,
         required: true
     },
-    "email":{
-        type:String ,
+    "email": {
+        type: String,
         required: true,
         unique: true
     },
-    "participatedContests": [{
-         type: Schema.Types.Array,
-        //contestId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contest' }
-      }],
-   
+    "role":{
+        type:String,
+        // default:"user"
+    },
+    participatedContests: [
+        {
+        type: mongoose.Schema.Types.Array,
+        ref: 'Contest',
+    }
+],
+
 })
 
-
+const Users=model('User',userSchema);
 module.exports = Users
