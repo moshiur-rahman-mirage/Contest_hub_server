@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
         // console.log(newPayment)
         const contestIds = newPayment.contest_id;
         // console.log(contestIds)
-        addUserParticipatedContests(email, contestIds)
+      await addUserParticipatedContests(email, contestIds)
 
     }
     // console.log(paymentResult)
@@ -39,25 +39,15 @@ async function addUserParticipatedContests(email, contestIds) {
             throw new Error('User not found.');
         }
 
-        const contestIdsArray = Array.isArray(contestIds) ? contestIds : [contestIds];
-        await User.updateOne(
 
-            { _id: id },
-            {
-                $push: {
-                    "participatedContests": {
-                        $each: contestIdsArray,
-                    },
-                },
-            }
-        );
+         await User.updateOne({ _id: id }, { $push: { participatedContests: contestIds } })
 
         console.log('Contest IDs added to the user successfully.');
         incrementParticipants(contestIds)
     } catch (error) {
         console.error('Error adding contest IDs to user:', error.message);
     } finally {
-        //   mongoose.disconnect();
+        
     }
 }
 
@@ -80,7 +70,7 @@ async function incrementParticipants(contestId) {
     } catch (error) {
         console.error('Error incrementing participants:', error.message);
     } finally {
-        // mongoose.disconnect();
+       
     }
 }
 

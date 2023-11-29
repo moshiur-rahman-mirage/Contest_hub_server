@@ -45,7 +45,13 @@ const contestSchema = new Schema({
     contest_category: {
         type: String,
          require: true
+    },
+    contest_winner: 
+        {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
     }
+
 
 
 })

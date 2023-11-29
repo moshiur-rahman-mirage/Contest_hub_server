@@ -19,9 +19,13 @@ const userSchema = new Schema({
         type:String,
         // default:"user"
     },
+    "win":{
+        type:Number,
+        // default:"user"
+    },
     participatedContests: [
         {
-        type: mongoose.Schema.Types.Array,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Contest',
     }
 ],

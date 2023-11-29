@@ -29,6 +29,20 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+// get TOP 5
+router.get('/top', async (req, res) => {
+    try {
+        const top5Items = await Contest
+            .find()
+            .sort({ participants: -1 })
+            .limit(6);
+        res.json(top5Items)
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+
+
+});
 
 // get one by id
 router.get('/:id', async (req, res) => {

@@ -12,7 +12,7 @@ const verifyAdmin = require('../applyMiddleWare/verifyAdmin');
 router.post('/jwt', setToken)
 
 
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', verifyToken,verifyAdmin, async (req, res) => {
     console.log('called')
     try {
         const data = await Users.find({})
@@ -44,6 +44,9 @@ router.get('/admin/:email', verifyToken, async (req, res) => {
 
 
 
+
+
+
 router.get('/creator/:email', verifyToken, async (req, res) => {
     const email = req.params.email;
     if (email !== req.decoded.email) {
@@ -69,11 +72,22 @@ router.get('/creator/:email', verifyToken, async (req, res) => {
 
 
 
+
+
+
 // get one by id
-router.get('/:id', async (req, res) => {
+router.get('/contest/:id', async (req, res) => {
     try {
-        const data = await Users.find({ _id: req.params.id })
-        res.json(data)
+        console.log('here')
+        const userData = await Users.find({ _id: req.params.id })
+
+        const participatedContests = userData.map(user => user.participatedContests);
+        console.log(participatedContests)
+        const transformedData = {
+            "participatedContests": participatedContests.map(innerArray => ({ "contestId": innerArray[0] }))
+        };
+        console.log('Participated Contests:', transformedData);
+        res.json(transformedData)
     } catch {
         // console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -120,7 +134,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // delete
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyToken,verifyAdmin, async (req, res) => {
     try {
         const id = req.params.id
         const deletedDocument = await Users.findByIdAndDelete(id)
