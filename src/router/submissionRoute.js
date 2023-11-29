@@ -111,6 +111,34 @@ router.get('/contest-users-inner-join/:contestId', async (req, res) => {
 })
 
 
+router.get('/participated-contests/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+  console.log('hh')
+
+      const user = await Users.findById(userId).populate('participatedContests');
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Extract relevant contest details
+      const participatedContests = user.participatedContests.map((contest) => ({
+        contestId: contest._id,
+        contestName: contest.contest_name,
+        contestDeadline: contest.contest_deadline,
+        contestPrize: contest.contest_prize,
+        // Add more details as needed
+      }));
+  
+      res.json(participatedContests);
+    } catch (error) {
+      console.error('Error:', error.message);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+
+
 
 
 
