@@ -121,6 +121,7 @@ router.put('/:id', async (req, res) => {
     try {
         const updatedDocument = await Users.findByIdAndUpdate(
             { _id: id },
+            req.body,
             { new: true, runValidators: true }
         );
         if (!updatedDocument) {
@@ -182,7 +183,9 @@ router.patch('/creator/:id', async (req, res) => {
 
 
 
-router.get('/:email', verifyToken, async (req, res) => {
+router.get('/:email', async (req, res) => {
+
+    // verifyToken
     try {
         const userData = await Users.find({ email: req.params.email })
         res.json(userData);
@@ -311,13 +314,13 @@ router.get('/top/creator', async (req, res) => {
 
 
 router.get('/winner/top', async (req, res) => {
-  
+
     try {
         const topWinners = await Users.aggregate([
             {
                 $project: {
                     name: 1,
-                    img:1,
+                    img: 1,
                     win: { $ifNull: ['$win', 0] }, // If win is null, use 0
                 },
             },
@@ -326,14 +329,14 @@ router.get('/winner/top', async (req, res) => {
         ]);
 
         if (topWinners.length > 0) {
-                res.json(topWinners)
+            res.json(topWinners)
         } else {
             console.log('No users found.');
         }
     } catch (error) {
         console.error('Error:', error.message);
     }
-    
+
 });
 
 
