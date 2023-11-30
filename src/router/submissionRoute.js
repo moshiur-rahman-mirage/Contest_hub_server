@@ -192,17 +192,21 @@ router.get('/winner/:userId', async (req, res) => {
 
 })
 
-router.get('/contest-users-inner-join', async (req, res) => {
+router.get('/contest-users/:creatorEmail', async (req, res) => {
+    const creatorEmail = req.params.creatorEmail;
+
     try {
         const result = await Users.aggregate([
             {
-                $unwind: '$participatedContests',
+                $match: {
+                    'email': creatorEmail,
+                },
             },
             {
                 $lookup: {
                     from: 'contests',
-                    localField: 'participatedContests',
-                    foreignField: '_id',
+                    localField: 'email', // Match user email with contest_creator field
+                    foreignField: 'contest_creator',
                     as: 'contestDetails',
                 },
             },
@@ -238,6 +242,73 @@ router.get('/contest-users-inner-join', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+
+
+
+
+router.get('/c/:creatorEmail', async (req, res) => {
+    const creatorEmail = req.params.creatorEmail;
+
+    try {
+        const result = await Users.aggregate([
+            {
+                $match: {
+                    'email': creatorEmail,
+                },
+            },
+            {
+                $unwind: {
+                    path: '$participatedContests',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'contests',
+                    localField: 'participatedContests._id',
+                    foreignField: '_id',
+                    as: 'contestDetails',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$contestDetails',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $match: {
+                    'contestDetails.contest_winner': null,
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    userName: '$name',
+                    userEmail: '$email',
+                    // contestDetails: {
+                        contest_name: '$contestDetails.contest_name',
+                        contest_deadline: '$contestDetails.contest_deadline',
+                        contest_price: '$contestDetails.contest_price',
+                        contest_prize: '$contestDetails.contest_prize',
+                        contest_id: '$contestDetails._id',
+                        contest_category: '$contestDetails.contest_category',
+                        contest_winner: '$contestDetails.contest_winner',
+                    // },
+                },
+            },
+        ]);
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 
 
 module.exports = router;
