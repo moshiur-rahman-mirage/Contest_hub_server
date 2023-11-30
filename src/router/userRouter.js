@@ -279,6 +279,9 @@ router.get('/top/creator', async (req, res) => {
                     contestCreatorName: {
                         $arrayElemAt: ['$userData.name', 0],
                     },
+                    contestCreatorPhoto: {
+                        $arrayElemAt: ['$userData.img', 0],
+                    },
                 },
             },
             {
@@ -289,7 +292,7 @@ router.get('/top/creator', async (req, res) => {
         ]);
 
         console.log(res);
-        res.json(result.map((entry) => ({ creator: entry._id, totalParticipants: entry.totalParticipants, contestCreatorName: entry.contestCreatorName })));
+        res.json(result.map((entry) => ({ creator: entry._id, totalParticipants: entry.totalParticipants,contestCreatorPhoto:entry.contestCreatorPhoto, contestCreatorName: entry.contestCreatorName })));
     } catch (error) {
         console.error('Error finding top contest creators:', error);
         res.status(500).json({ error: 'Internal Server Error' });
