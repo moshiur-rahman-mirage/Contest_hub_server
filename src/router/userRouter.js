@@ -317,6 +317,7 @@ router.get('/winner/top', async (req, res) => {
             {
                 $project: {
                     name: 1,
+                    img:1,
                     win: { $ifNull: ['$win', 0] }, // If win is null, use 0
                 },
             },
