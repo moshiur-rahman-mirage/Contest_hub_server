@@ -312,21 +312,26 @@ router.get('/top/creator', async (req, res) => {
 
 router.get('/winner/top', async (req, res) => {
   
-        try {
-            const topWinners = await Users.find().sort({ win: -1 }).limit(3);
+    try {
+        const topWinners = await Users.aggregate([
+            {
+                $project: {
+                    name: 1,
+                    win: { $ifNull: ['$win', 0] }, // If win is null, use 0
+                },
+            },
+            { $sort: { win: -1 } },
+            { $limit: 3 },
+        ]);
 
-            if (topWinners.length > 0) {
-                console.log('Top 3 users with the most wins:');
+        if (topWinners.length > 0) {
                 res.json(topWinners)
-                topWinners.forEach((user, index) => {
-                    console.log(`${index + 1}. ${user.name} - ${user.win} wins`);
-                });
-            } else {
-                console.log('No users found.');
-            }
-        } catch (error) {
-            console.error('Error:', error.message);
+        } else {
+            console.log('No users found.');
         }
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
     
 });
 
