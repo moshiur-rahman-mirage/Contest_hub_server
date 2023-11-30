@@ -141,19 +141,19 @@ router.put('/update/all', async (req, res) => {
     console.log('update all')
     const updateOperation = {
         $set: {
-          contest_creator: 'moshiur.mirage@gmail.com',
+            contest_creator: 'moshiur.mirage@gmail.com',
         },
-      };
+    };
 
-      Contest.updateMany( updateOperation)
-      .then((result) => {
-        console.log(`${result.nModified} documents updated.`);
-        res.json(result)
-      })
-      .catch((error) => {
-        console.error('Error updating documents:', error);
-        res.json(error)
-      });
+    Contest.updateMany(updateOperation)
+        .then((result) => {
+            console.log(`${result.nModified} documents updated.`);
+            res.json(result)
+        })
+        .catch((error) => {
+            console.error('Error updating documents:', error);
+            res.json(error)
+        });
 });
 
 
@@ -168,8 +168,27 @@ router.get('/categorycount/count', async (req, res) => {
         if (req.query?.contest_category) {
             query = { contest_category: req.query.contest_category };
         }
-       console.log('here')
+        console.log('here')
         const data = await Contest.countDocuments(query)
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/getcontest/page', async (req, res) => {
+    try {
+
+        const query = { contest_category: req.query.contest_category };
+        const page = parseInt(req.query.page);
+        const size = parseInt(req.query.size);
+
+        const data = await Contest.find(query)
+            .skip(page * size)
+            .limit(size)
+           
+
         res.json(data);
     } catch (error) {
         console.error(error);

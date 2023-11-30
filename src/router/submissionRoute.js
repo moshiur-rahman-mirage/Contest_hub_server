@@ -113,30 +113,30 @@ router.get('/contest-users-inner-join/:contestId', async (req, res) => {
 
 router.get('/participated-contests/:userId', async (req, res) => {
     try {
-      const userId = req.params.userId;
-  console.log('hh')
+        const userId = req.params.userId;
+        console.log('hh')
 
-      const user = await Users.findById(userId).populate('participatedContests');
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      // Extract relevant contest details
-      const participatedContests = user.participatedContests.map((contest) => ({
-        contestId: contest._id,
-        contestName: contest.contest_name,
-        contestDeadline: contest.contest_deadline,
-        contestPrize: contest.contest_prize,
-        // Add more details as needed
-      }));
-  
-      res.json(participatedContests);
+        const user = await Users.findById(userId).populate('participatedContests');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Extract relevant contest details
+        const participatedContests = user.participatedContests.map((contest) => ({
+            contestId: contest._id,
+            contestName: contest.contest_name,
+            contestDeadline: contest.contest_deadline,
+            contestPrize: contest.contest_prize,
+            // Add more details as needed
+        }));
+
+        res.json(participatedContests);
     } catch (error) {
-      console.error('Error:', error.message);
-      res.status(500).json({ message: 'Internal Server Error' });
+        console.error('Error:', error.message);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-  });
+});
 
 
 
@@ -171,5 +171,73 @@ router.patch('/contest-users-winner', async (req, res) => {
 
     }
 })
+
+
+
+
+router.get('/winner/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    console.log(userId)
+    Contests.findOne({ contest_winner: userId })
+        .then((result) => {
+            if (result) {
+                res.json(result)
+            } else {
+                res.json({ message: "has not won" })
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+
+})
+
+router.get('/contest-users-inner-join', async (req, res) => {
+    try {
+        const result = await Users.aggregate([
+            {
+                $unwind: '$participatedContests',
+            },
+            {
+                $lookup: {
+                    from: 'contests',
+                    localField: 'participatedContests',
+                    foreignField: '_id',
+                    as: 'contestDetails',
+                },
+            },
+            {
+                $unwind: '$contestDetails',
+            },
+            {
+                $match: {
+                    'contestDetails.contest_winner': null,
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    userName: '$name',
+                    userEmail: '$email',
+                    // contestDetails: {
+                        contest_name: '$contestDetails.contest_name',
+                        contest_deadline: '$contestDetails.contest_deadline',
+                        contest_price: '$contestDetails.contest_price',
+                        contest_prize: '$contestDetails.contest_prize',
+                        contest_id: '$contestDetails._id',
+                        contest_category: '$contestDetails.contest_category',
+                        contest_winner: '$contestDetails.contest_winner',
+                    // },
+                },
+            },
+        ]);
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 module.exports = router;
