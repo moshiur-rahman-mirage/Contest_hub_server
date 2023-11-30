@@ -6,13 +6,14 @@ const Users = require('../models/Users');
 const setToken = require('../authentication/setToken');
 const verifyToken = require('../applyMiddleWare/verifyToken');
 const verifyAdmin = require('../applyMiddleWare/verifyAdmin');
+const Contests = require('../models/Contests');
 
 // const User = require('../models/Users');
 
 router.post('/jwt', setToken)
 
 
-router.get('/', verifyToken,verifyAdmin, async (req, res) => {
+router.get('/', verifyToken, verifyAdmin, async (req, res) => {
     console.log('called')
     try {
         const data = await Users.find({})
@@ -98,7 +99,7 @@ router.get('/contest/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const newUser = new Users(req.body);
-        // console.log(newUser)
+
         const savedInstance = await newUser.save()
         res.json(savedInstance);
     }
@@ -134,7 +135,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // delete
-router.delete('/:id',verifyToken,verifyAdmin, async (req, res) => {
+router.delete('/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const id = req.params.id
         const deletedDocument = await Users.findByIdAndDelete(id)
@@ -181,15 +182,123 @@ router.patch('/creator/:id', async (req, res) => {
 
 
 
-router.get('/:email', async (req, res) => {
+router.get('/:email', verifyToken, async (req, res) => {
     try {
         const userData = await Users.find({ email: req.params.email })
         res.json(userData);
     } catch (error) {
-       
+
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.get('/contests/win', async (req, res) => {
+    console.log('called win')
+    try {
+        const top3Items = await Users
+            .find()
+            .sort({ win: -1 })
+            .limit(3);
+        res.json(top3Items)
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+
+
+});
+
+
+
+router.get('/topxx/creator', async (req, res) => {
+console.log('called')
+
+        try {
+            const result = await Contests.aggregate([
+                {
+                    $group: {
+                        _id: '$contest_creator',
+                        totalParticipants: { $sum: {
+                            $ifNull: ['$participants', 0], // Use $ifNull to handle missing or null participants
+                          }, },
+                    },
+                },
+                {
+                    $sort: {
+                        totalParticipants: -1,
+                    },
+                },
+                {
+                    $limit: 3,
+                },
+            ]);
+console.log(res)
+            res.json(result.map((entry) => entry._id)); // Returns an array of the top 3 contest creators
+        } catch (error) {
+            console.error('Error finding top contest creators:', error);
+            throw error;
+        }
+ 
+
+})
+
+
+
+router.get('/top/creator', async (req, res) => {
+    console.log('called');
+
+    try {
+        const result = await Contests.aggregate([
+            {
+                $group: {
+                    _id: '$contest_creator',
+                    totalParticipants: {
+                        $sum: {
+                            $ifNull: ['$participants', 0],
+                        },
+                    },
+                },
+            },
+            {
+                $sort: {
+                    totalParticipants: -1,
+                },
+            },
+            {
+                $limit: 3,
+            },
+            {
+                $lookup: {
+                    from: 'users', // Assuming your User model is named 'User'
+                    localField: '_id',
+                    foreignField: 'email', // Adjust this based on the actual field in the User model that corresponds to the contest_creator
+                    as: 'userData',
+                },
+            },
+            {
+                $addFields: {
+                    contestCreatorName: {
+                        $arrayElemAt: ['$userData.name', 0],
+                    },
+                },
+            },
+            {
+                $project: {
+                    userData: 0, // Exclude the userData array from the final result
+                },
+            },
+        ]);
+
+        console.log(res);
+        res.json(result.map((entry) => ({ creator: entry._id, totalParticipants: entry.totalParticipants, contestCreatorName: entry.contestCreatorName })));
+    } catch (error) {
+        console.error('Error finding top contest creators:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
+
 
 
 module.exports = router;

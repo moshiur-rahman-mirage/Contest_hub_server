@@ -50,8 +50,6 @@ router.get('/:id', async (req, res) => {
         const data = await Contest.findById(req.params.id);
         res.json(data);
     } catch (error) {
-        // console.log('why here?');
-        // console.log(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -135,6 +133,27 @@ router.delete('/', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+
+
+router.put('/update/all', async (req, res) => {
+    console.log('update all')
+    const updateOperation = {
+        $set: {
+          contest_creator: 'moshiur.mirage@gmail.com',
+        },
+      };
+
+      Contest.updateMany( updateOperation)
+      .then((result) => {
+        console.log(`${result.nModified} documents updated.`);
+        res.json(result)
+      })
+      .catch((error) => {
+        console.error('Error updating documents:', error);
+        res.json(error)
+      });
 });
 
 module.exports = router;

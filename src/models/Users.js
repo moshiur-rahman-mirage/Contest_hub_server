@@ -4,7 +4,7 @@ const userSchema = new Schema({
 
     'img': {
         type: String,
-        required: true
+        // required: true
     },
     "name": {
         type: String,
