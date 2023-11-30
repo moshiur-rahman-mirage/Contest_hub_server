@@ -156,4 +156,25 @@ router.put('/update/all', async (req, res) => {
       });
 });
 
+
+
+
+// for pagination
+
+// category
+router.get('/categorycount/count', async (req, res) => {
+    try {
+        let query = {};
+        if (req.query?.contest_category) {
+            query = { contest_category: req.query.contest_category };
+        }
+       console.log('here')
+        const data = await Contest.countDocuments(query)
+        res.json(data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;
