@@ -210,34 +210,36 @@ router.get('/contests/win', async (req, res) => {
 
 
 router.get('/topxx/creator', async (req, res) => {
-console.log('called')
+    console.log('called')
 
-        try {
-            const result = await Contests.aggregate([
-                {
-                    $group: {
-                        _id: '$contest_creator',
-                        totalParticipants: { $sum: {
+    try {
+        const result = await Contests.aggregate([
+            {
+                $group: {
+                    _id: '$contest_creator',
+                    totalParticipants: {
+                        $sum: {
                             $ifNull: ['$participants', 0], // Use $ifNull to handle missing or null participants
-                          }, },
+                        },
                     },
                 },
-                {
-                    $sort: {
-                        totalParticipants: -1,
-                    },
+            },
+            {
+                $sort: {
+                    totalParticipants: -1,
                 },
-                {
-                    $limit: 3,
-                },
-            ]);
-console.log(res)
-            res.json(result.map((entry) => entry._id)); // Returns an array of the top 3 contest creators
-        } catch (error) {
-            console.error('Error finding top contest creators:', error);
-            throw error;
-        }
- 
+            },
+            {
+                $limit: 3,
+            },
+        ]);
+        console.log(res)
+        res.json(result.map((entry) => entry._id)); // Returns an array of the top 3 contest creators
+    } catch (error) {
+        console.error('Error finding top contest creators:', error);
+        throw error;
+    }
+
 
 })
 
@@ -295,7 +297,7 @@ router.get('/top/creator', async (req, res) => {
         ]);
 
         console.log(res);
-        res.json(result.map((entry) => ({ creator: entry._id, totalParticipants: entry.totalParticipants,creatorId:entry.creatorId,contestCreatorPhoto:entry.contestCreatorPhoto, contestCreatorName: entry.contestCreatorName })));
+        res.json(result.map((entry) => ({ creator: entry._id, totalParticipants: entry.totalParticipants, creatorId: entry.creatorId, contestCreatorPhoto: entry.contestCreatorPhoto, contestCreatorName: entry.contestCreatorName })));
     } catch (error) {
         console.error('Error finding top contest creators:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -304,6 +306,29 @@ router.get('/top/creator', async (req, res) => {
 
 
 
+
+
+
+
+router.get('/winner/top', async (req, res) => {
+  
+        try {
+            const topWinners = await Users.find().sort({ win: -1 }).limit(3);
+
+            if (topWinners.length > 0) {
+                console.log('Top 3 users with the most wins:');
+                res.json(topWinners)
+                topWinners.forEach((user, index) => {
+                    console.log(`${index + 1}. ${user.name} - ${user.win} wins`);
+                });
+            } else {
+                console.log('No users found.');
+            }
+        } catch (error) {
+            console.error('Error:', error.message);
+        }
+    
+});
 
 
 
