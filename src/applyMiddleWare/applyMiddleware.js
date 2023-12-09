@@ -11,6 +11,7 @@ app.use(cors({
         LOCAL_CLIENT,
         PRODUCTION_CLIENT,
         'https://api.imgbb.com/1/upload',
+        'https://animaetdcontest.web.app/',
         "*"
 
     ],
